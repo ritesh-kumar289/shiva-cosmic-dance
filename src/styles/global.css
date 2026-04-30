@@ -13,6 +13,10 @@ html {
   background: #000;
   overflow-x: hidden;
   scroll-behavior: auto; /* Lenis handles smoothness */
+  /* Allow vertical scroll on touch devices, prevent the browser's pinch-zoom
+     fighting our gestures. iOS needs both html and body. */
+  touch-action: pan-y;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -20,11 +24,16 @@ body {
   color: #fff;
   font-family: 'Cinzel', 'Georgia', serif;
   overflow-x: hidden;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
 }
 
 canvas {
   display: block;
-  touch-action: none;
+  /* Critical: let touch finger scroll the page; only block horizontal
+     gestures so the camera drag can still work for tablet horizontal swipes. */
+  touch-action: pan-y;
 }
 
 /* ── Scroll container ─────────────────────────────────────── */
@@ -439,7 +448,48 @@ canvas {
 }
 
 /* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  /* Tablets */
+  .progress-dots { right: 18px; gap: 11px; }
+  .audio-toggle  { top: 16px; right: 16px; padding: 7px 11px; }
+  .audio-toggle__lbl { display: none; }
+  .trishul-track { width: clamp(220px, 70vw, 480px); }
+}
+
 @media (max-width: 768px) {
-  .progress-dots { right: 16px; }
-  .scroll-hint   { bottom: 20px; }
+  /* Mobile */
+  .progress-dots { right: 14px; gap: 10px; }
+  .dot { width: 6px; height: 6px; }
+  .scroll-hint   { bottom: 18px; }
+  .scroll-hint__line { height: 32px; }
+  .audio-toggle { top: 12px; right: 12px; padding: 6px 9px; font-size: 0.85rem; }
+  .audio-toggle__lbl { display: none; }
+
+  .loader__title { font-size: clamp(1.6rem, 9vw, 2.6rem); }
+  .loader__sub   { font-size: 0.6rem; letter-spacing: 0.32em; text-align: center; padding: 0 1rem; }
+  .trishul-track { width: clamp(200px, 78vw, 360px); height: 3px; }
+  .loader__pct   { font-size: 0.7rem; letter-spacing: 0.4em; }
+
+  /* Pull big scene texts down a touch and shrink so they don't overflow */
+  .scene-text {
+    width: 92vw !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    text-align: center;
+  }
+  .scene-title { font-size: clamp(1.4rem, 7vw, 2.6rem) !important; letter-spacing: 0.18em !important; }
+  .scene-sub   { font-size: clamp(0.6rem, 2.4vw, 0.85rem) !important; letter-spacing: 0.32em !important; }
+  .scene-mantra { font-size: clamp(1rem, 5vw, 1.6rem) !important; }
+}
+
+@media (max-width: 480px) {
+  /* Small phones */
+  .progress-dots { display: none; }
+  .scene-title { letter-spacing: 0.14em !important; }
+}
+
+@media (min-width: 1920px) {
+  /* Big screens — keep the cinematic feel from getting puny */
+  .scene-title { font-size: clamp(3rem, 4.2vw, 6rem); }
+  .trishul-track { width: clamp(420px, 38vw, 720px); }
 }

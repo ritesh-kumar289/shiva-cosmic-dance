@@ -106,6 +106,8 @@ export default function CameraRig() {
     const onDown = (e) => {
       // Only react to primary (left) button and ignore drags that start on UI
       if (e.button !== 0) return
+      // On touch devices, let the native scroll happen — don't hijack as drag.
+      if (e.pointerType === 'touch') return
       const tgt = e.target
       if (tgt && tgt.closest && tgt.closest('[data-ui], button, a, input, textarea')) return
       drag.current.active = true
