@@ -166,10 +166,18 @@ function CosmicTextParticles({ entry }) {
   const groupRef = useRef()
   const matRef   = useRef()
 
-  const { positions, phases } = useMemo(
-    () => sampleTextPoints(entry.text, entry.kind, entry.size),
-    [entry.text, entry.kind, entry.size]
-  )
+  const { positions, phases, widthWorld } = useMemo(() => {
+    const r = sampleTextPoints(entry.text, entry.kind, entry.size)
+    // Compute the world-space extent of the rasterised text so we can
+    // shrink it to fit narrow viewports without guessing.
+    let minX = Infinity, maxX = -Infinity
+    for (let i = 0; i < r.positions.length; i += 3) {
+      const x = r.positions[i]
+      if (x < minX) minX = x
+      if (x > maxX) maxX = x
+    }
+    return { ...r, widthWorld: Math.max(0.001, maxX - minX) }
+  }, [entry.text, entry.kind, entry.size])
 
   useEffect(bindMouse, [])
 
@@ -188,7 +196,7 @@ function CosmicTextParticles({ entry }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [entry.color, entry.kind])
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock, size, camera }) => {
     const t = clock.getElapsedTime()
     const p = scrollStore.progress
     const [a, b] = entry.range
@@ -204,8 +212,63 @@ function CosmicTextParticles({ entry }) {
       u.uHover.value = THREE.MathUtils.lerp(u.uHover.value, alpha, 0.05)
     }
     if (groupRef.current) {
-      groupRef.current.position.y = entry.pos[1] + Math.sin(t * 0.4 + entry.pos[0] * 0.05) * 0.4
-      groupRef.current.position.z = entry.pos[2] + (1 - alpha) * -6
+      // Adapt to viewport aspect: on portrait/narrow screens, anchor texts
+      // to the camera frustum so the dense Devanagari never falls off the
+      // edges no matter how the camera pans/orbits across scenes.
+      const aspect = (size?.width || 1) / Math.max(1, size?.height || 1)
+
+      // Centre-anchor ramp: full effect when aspect < 0.85, none when > 1.4
+      const stack = Math.max(0, Math.min(1, (1.4 - aspect) / (1.4 - 0.85)))
+
+      const desktopAspect = 1.78
+      // Required scale so the text width fits inside the visible frustum
+      // when anchored to the camera at `dist`. Re-evaluated on every frame
+      // because aspect/fov can change with rotation/resize.
+      const dist = 18
+      const fovRad = ((camera?.fov || 58) * Math.PI) / 180
+      const halfH  = Math.tan(fovRad / 2) * dist
+      const halfW  = halfH * aspect
+      const safeWorldWidth = entry.kind === 'main' ? halfW * 1.7 : halfW * 1.2
+      const fitScale = Math.min(1, safeWorldWidth / widthWorld)
+      // On wide screens we use the natural aspect ramp; on narrow ones we
+      // prefer the smaller of (aspect-shrink) or (width-fit) so glyphs
+      // never spill past the edges regardless of original entry.size.
+      const aspectScale = Math.min(1, Math.sqrt(aspect / desktopAspect))
+      const sizeFactor  = stack > 0.01 ? Math.min(aspectScale, fitScale) : aspectScale
+      groupRef.current.scale.setScalar(sizeFactor)
+
+      // ── Compute world position ────────────────────────────────────
+      // (a) WIDE position: original world coordinates.
+      const wideX = entry.pos[0]
+      const wideY = entry.pos[1] + Math.sin(t * 0.4 + entry.pos[0] * 0.05) * 0.4
+      const wideZ = entry.pos[2] + (1 - alpha) * -6
+
+      // (b) NARROW position: anchored relative to the camera. We place the
+      //     text at a fixed offset along the camera's local axes so it
+      //     always sits in the visible frustum even when the camera pans.
+      let narrowX = wideX, narrowY = wideY, narrowZ = wideZ
+      if (camera && stack > 0.01) {
+        // Sub/mantra/desc texts get a small horizontal offset so multiple
+        // entries don't perfectly overlap. Main mantras stay centred.
+        const sgn = Math.sign(entry.pos[0] || 1)
+        const offX = entry.kind === 'main' ? 0 : sgn * Math.min(halfW * 0.32, 1.6)
+        // Vertical position: spread roughly by entry.pos[1] but compressed.
+        const yPivot = entry.kind === 'main' ? 24 : 22
+        const yRel   = (entry.pos[1] - yPivot) * 0.18  // small relative offset
+        const offY   = entry.kind === 'main' ? halfH * 0.45 : (halfH * 0.20 + yRel)
+
+        // Apply offset in camera-local space, then transform to world.
+        const local = new THREE.Vector3(offX, offY, -dist)
+        local.applyMatrix4(camera.matrixWorld)
+        narrowX = local.x
+        narrowY = local.y + Math.sin(t * 0.5 + entry.pos[0] * 0.05) * 0.25
+        narrowZ = local.z
+      }
+
+      // (c) BLEND wide → narrow by stack ratio.
+      groupRef.current.position.x = wideX * (1 - stack) + narrowX * stack
+      groupRef.current.position.y = wideY * (1 - stack) + narrowY * stack
+      groupRef.current.position.z = wideZ * (1 - stack) + narrowZ * stack
     }
   })
 
