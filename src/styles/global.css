@@ -1,0 +1,445 @@
+/* ──────────────────────────────────────────────────────────────
+   SHIVA — THE COSMIC DANCE (TANDAVA)
+   Global Styles
+────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: #000;
+  overflow-x: hidden;
+  scroll-behavior: auto; /* Lenis handles smoothness */
+}
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: 'Cinzel', 'Georgia', serif;
+  overflow-x: hidden;
+}
+
+canvas {
+  display: block;
+  touch-action: none;
+}
+
+/* ── Scroll container ─────────────────────────────────────── */
+.scroll-container {
+  height: 600vh;
+  position: relative;
+}
+
+.canvas-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+/* ── Loader ───────────────────────────────────────────────── */
+.loader {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, #05071a 0%, #000 100%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  transition: opacity 1.2s ease, visibility 1.2s ease;
+}
+
+.loader--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader__om {
+  font-size: 5rem;
+  animation: om-pulse 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(100, 140, 255, 0.8));
+}
+
+.loader__title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: rgba(180, 200, 255, 0.9);
+  text-shadow: 0 0 40px rgba(100, 140, 255, 0.6);
+}
+
+.loader__sub {
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.loader__bar {
+  width: 220px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.loader__bar-fill {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  height: 100%;
+  width: 60%;
+  background: linear-gradient(90deg, transparent, rgba(100, 160, 255, 0.9), transparent);
+  animation: bar-slide 1.8s ease-in-out infinite;
+}
+
+/* ── Trishul loader track ────────────────────────────────── */
+.trishul-track {
+  position: relative;
+  width: clamp(280px, 56vw, 560px);
+  height: 4px;
+  margin-top: 1.5rem;
+  background: rgba(140, 180, 255, 0.12);
+  border-radius: 4px;
+}
+.trishul-track__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  background: linear-gradient(90deg,
+    rgba(100, 160, 255, 0.0) 0%,
+    rgba(120, 180, 255, 0.65) 60%,
+    rgba(180, 220, 255, 0.95) 100%);
+  border-radius: 4px;
+  box-shadow: 0 0 14px rgba(120, 170, 255, 0.6);
+  transition: width 0.18s linear;
+}
+.trishul-track__icon {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-58%);
+  transition: left 0.22s linear;
+  pointer-events: none;
+  filter: drop-shadow(0 0 18px rgba(120, 170, 255, 0.55));
+  animation: trishul-bob 1.6s ease-in-out infinite;
+}
+@keyframes trishul-bob {
+  0%, 100% { transform: translateY(-58%) rotate(-2deg); }
+  50%       { transform: translateY(-62%) rotate(2deg); }
+}
+
+.loader__pct {
+  margin-top: 1rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.5em;
+  color: rgba(180, 210, 255, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Overlay wrapper ─────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ── Scene text blocks ───────────────────────────────────── */
+.scene-text {
+  position: absolute;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  will-change: opacity, transform;
+}
+
+.scene-text--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scene 1 — Void */
+.scene-text--1 {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateY(12px);
+}
+.scene-text--1.scene-text--visible {
+  transform: translate(-50%, -50%) translateY(0);
+}
+.scene-text--1 .scene-label {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(0.9rem, 2.5vw, 1.5rem);
+  letter-spacing: 0.6em;
+  color: rgba(180, 200, 255, 0.6);
+}
+.scene-text--1 .scene-title {
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  font-weight: 900;
+  letter-spacing: 0.25em;
+  color: rgba(200, 220, 255, 0.85);
+  text-shadow: 0 0 80px rgba(80, 120, 255, 0.5);
+  line-height: 1.1;
+  margin-top: 0.3rem;
+}
+.scene-text--1 .scene-sub {
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
+  letter-spacing: 0.4em;
+  color: rgba(200, 220, 255, 0.3);
+  margin-top: 1rem;
+}
+
+/* Scene 2 — Awakening */
+.scene-text--2 {
+  bottom: 18%;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+}
+.scene-text--2.scene-text--visible {
+  transform: translateX(-50%) translateY(0);
+}
+.scene-text--2 .scene-label {
+  font-size: clamp(0.7rem, 1.5vw, 0.95rem);
+  letter-spacing: 0.5em;
+  color: rgba(100, 180, 255, 0.5);
+}
+.scene-text--2 .scene-title {
+  font-size: clamp(1.8rem, 5vw, 4rem);
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: rgba(140, 200, 255, 0.9);
+  text-shadow: 0 0 60px rgba(60, 140, 255, 0.6);
+  margin-top: 0.4rem;
+}
+
+/* Scene 3 — Tandava */
+.scene-text--3 {
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+}
+.scene-text--3.scene-text--visible {
+  transform: translateX(-50%) translateY(0);
+}
+.scene-text--3 .scene-label {
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
+  letter-spacing: 0.5em;
+  color: rgba(255, 140, 40, 0.5);
+}
+.scene-text--3 .scene-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: rgba(255, 160, 60, 0.95);
+  text-shadow: 0 0 60px rgba(255, 100, 0, 0.8), 0 0 120px rgba(255, 60, 0, 0.4);
+  margin-top: 0.3rem;
+  animation: tandava-flicker 3s ease-in-out infinite;
+}
+
+/* Scene 4 — Third Eye */
+.scene-text--4 {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateY(12px);
+}
+.scene-text--4.scene-text--visible {
+  transform: translate(-50%, -50%) translateY(0);
+}
+.scene-text--4 .scene-label {
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+  letter-spacing: 0.6em;
+  color: rgba(255, 80, 40, 0.6);
+}
+.scene-text--4 .scene-title {
+  font-size: clamp(2rem, 5.5vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  color: rgba(255, 100, 30, 0.98);
+  text-shadow:
+    0 0 30px rgba(255, 80, 0, 1),
+    0 0 80px rgba(255, 50, 0, 0.8),
+    0 0 150px rgba(255, 30, 0, 0.4);
+  margin-top: 0.4rem;
+  animation: eye-pulse 1.5s ease-in-out infinite;
+}
+
+/* Scene 5 — Dissolution / OM */
+.scene-text--5 {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateY(12px);
+}
+.scene-text--5.scene-text--visible {
+  transform: translate(-50%, -50%) translateY(0);
+}
+.scene-text--5 .scene-om {
+  font-size: clamp(5rem, 18vw, 14rem);
+  color: rgba(200, 170, 255, 0.95);
+  text-shadow:
+    0 0 60px rgba(150, 100, 255, 0.9),
+    0 0 120px rgba(100, 60, 255, 0.5);
+  animation: om-glow 4s ease-in-out infinite;
+  line-height: 1;
+}
+.scene-text--5 .scene-sub {
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
+  letter-spacing: 0.6em;
+  color: rgba(200, 180, 255, 0.45);
+  margin-top: 0.8rem;
+}
+
+/* ── Progress dots ───────────────────────────────────────── */
+.progress-dots {
+  position: fixed;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  pointer-events: auto;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: all 0.35s ease;
+  background: transparent;
+}
+
+.dot--active {
+  background: rgba(120, 160, 255, 0.9);
+  border-color: rgba(120, 160, 255, 0.8);
+  box-shadow: 0 0 12px rgba(100, 140, 255, 0.7);
+  transform: scale(1.4);
+}
+
+.dot:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Scroll hint ─────────────────────────────────────────── */
+.scroll-hint {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+
+.scroll-hint--visible {
+  opacity: 1;
+  animation: hint-fade 6s ease 1s forwards;
+}
+
+.scroll-hint__text {
+  font-size: 0.65rem;
+  letter-spacing: 0.45em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.scroll-hint__line {
+  width: 1px;
+  height: 44px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.35), transparent);
+  animation: line-scroll 2.2s ease-in-out infinite;
+}
+
+/* ── Audio toggle ─────────────────────────────────────────── */
+.audio-toggle {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px 9px 12px;
+  background: rgba(10, 12, 24, 0.55);
+  border: 1px solid rgba(140, 180, 255, 0.25);
+  border-radius: 999px;
+  color: rgba(220, 230, 255, 0.85);
+  font-size: 0.7rem;
+  letter-spacing: 0.32em;
+  font-family: inherit;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+}
+.audio-toggle:hover {
+  background: rgba(40, 50, 80, 0.7);
+  border-color: rgba(180, 210, 255, 0.55);
+  transform: translateY(-1px);
+}
+.audio-toggle__lbl {
+  font-size: 0.6rem;
+  letter-spacing: 0.32em;
+  color: rgba(200, 220, 255, 0.7);
+}
+
+/* ── Keyframes ───────────────────────────────────────────── */
+@keyframes om-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.08); }
+}
+
+@keyframes bar-slide {
+  0%   { left: -60%; }
+  100% { left: 120%; }
+}
+
+@keyframes tandava-flicker {
+  0%, 100% { opacity: 0.95; text-shadow: 0 0 60px rgba(255, 100, 0, 0.8); }
+  50%       { opacity: 1;    text-shadow: 0 0 90px rgba(255, 120, 0, 1); }
+}
+
+@keyframes eye-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.03); }
+}
+
+@keyframes om-glow {
+  0%, 100% { text-shadow: 0 0 60px rgba(150, 100, 255, 0.9); }
+  50%       { text-shadow: 0 0 100px rgba(180, 130, 255, 1), 0 0 200px rgba(120, 80, 255, 0.5); }
+}
+
+@keyframes hint-fade {
+  0%   { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes line-scroll {
+  0%   { transform: scaleY(0); transform-origin: top; }
+  45%  { transform: scaleY(1); transform-origin: top; }
+  50%  { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .progress-dots { right: 16px; }
+  .scroll-hint   { bottom: 20px; }
+}
