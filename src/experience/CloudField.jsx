@@ -92,56 +92,56 @@ function mulberry32(seed) {
   }
 }
 
-// Scattered puff layout: 4 zones (far surround, mid chest-height, low mist,
-// high cirrus) — together they wrap the scene 360° from ground to high sky.
+// Scattered puff layout: clouds stay BELOW Shiva's chest (~y=2) so the
+// hero figure remains clear above an ocean of cloud at every angle.
 function buildPuffs() {
   const rand = mulberry32(0xC10D)
   const puffs = []
 
-  // Far surround — bulk wrap-around horizon
+  // Far surround — bulk wrap-around horizon (kept low)
   for (let i = 0; i < 50; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 22 + rand() * 48
-    const y     = -4 + rand() * 32
+    const y     = -6 + rand() * 7                  // -6..1 (under chest)
     const size  = 18 + rand() * 26
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
-      aspect: 1.6 + rand() * 1.4,                  // 1.6..3.0 — wide strips
+      aspect: 1.6 + rand() * 1.4,
       drift: [(rand() - 0.5) * 0.02, (rand() - 0.5) * 0.02],
-      yTint: THREE.MathUtils.clamp((y - 8) / 16, -1, 1),
+      yTint: THREE.MathUtils.clamp((y + 2) / 6, -1, 1),
       op: 0.55 + rand() * 0.30,
       parX: 2 + rand() * 6, parZ: 1 + rand() * 3,
     })
   }
 
-  // Mid — closer puffs at chest-to-head height
+  // Mid — closer puffs around the mountain flanks (still below chest)
   for (let i = 0; i < 26; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 14 + rand() * 12
-    const y     = -2 + rand() * 12
+    const y     = -4 + rand() * 5                  // -4..1
     const size  = 10 + rand() * 14
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
       aspect: 1.8 + rand() * 1.6,
       drift: [(rand() - 0.5) * 0.025, (rand() - 0.5) * 0.025],
-      yTint: THREE.MathUtils.clamp((y - 4) / 10, -0.6, 0.6),
+      yTint: THREE.MathUtils.clamp((y + 2) / 5, -0.6, 0.6),
       op: 0.40 + rand() * 0.30,
       parX: 4 + rand() * 6, parZ: 1 + rand() * 3,
     })
   }
 
-  // Low ground mist — flat, just above snow (very wide & thin)
-  for (let i = 0; i < 18; i++) {
+  // Low ground mist — wide thin sheets just above the snow
+  for (let i = 0; i < 22; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 10 + rand() * 35
-    const y     = -6 + rand() * 3
+    const y     = -7 + rand() * 4                  // -7..-3
     const size  = 26 + rand() * 30
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
-      aspect: 2.4 + rand() * 1.8,                  // very stretched horizontally
+      aspect: 2.4 + rand() * 1.8,
       drift: [(rand() - 0.5) * 0.015, (rand() - 0.5) * 0.015],
       yTint: -0.6,
       op: 0.45 + rand() * 0.25,
@@ -149,20 +149,20 @@ function buildPuffs() {
     })
   }
 
-  // High cirrus — long thin streaks
-  for (let i = 0; i < 20; i++) {
+  // Sea-of-cloud belt — long horizon strips right under chest line
+  for (let i = 0; i < 18; i++) {
     const theta = rand() * Math.PI * 2
-    const r     = 18 + rand() * 40
-    const y     = 18 + rand() * 14
-    const size  = 22 + rand() * 30
+    const r     = 28 + rand() * 35
+    const y     = -1 + rand() * 2.5                // -1..1.5 (chest-line haze)
+    const size  = 28 + rand() * 32
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
-      aspect: 2.8 + rand() * 2.0,                  // long wisps
-      drift: [(rand() - 0.5) * 0.03, (rand() - 0.5) * 0.01],
-      yTint: 0.8,
+      aspect: 3.0 + rand() * 2.0,                  // very long horizontal wisps
+      drift: [(rand() - 0.5) * 0.018, (rand() - 0.5) * 0.008],
+      yTint: 0.2,
       op: 0.30 + rand() * 0.25,
-      parX: 6 + rand() * 6, parZ: 2 + rand() * 3,
+      parX: 5 + rand() * 5, parZ: 2 + rand() * 2,
     })
   }
 
