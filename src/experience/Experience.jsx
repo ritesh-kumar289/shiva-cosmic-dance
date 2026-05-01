@@ -11,8 +11,7 @@ import DissolutionEffect from './DissolutionEffect'
 import PostFX from './PostFX'
 import Lighting from './Lighting'
 import CosmicTexts from './CosmicTexts'
-import CloudCarpet from './CloudCarpet'
-import AmbientClouds from './AmbientClouds'
+import CloudField from './CloudField'
 import ThemedFog from './ThemedFog'
 
 // Trigger preload early so GLB is cached before components render
@@ -68,11 +67,8 @@ export default function Experience() {
         <Kailash />
       </Suspense>
 
-      {/* Vanta-style cloud carpet around mountain base */}
-      <CloudCarpet />
-
-      {/* Sparse drifting puffs framing the scene with parallax */}
-      <AmbientClouds />
+      {/* Volumetric vanta-style cloud field — fully surrounds the scene */}
+      <CloudField />
 
       {/* Sacred ash particles drift near mountain base — in world space, not Shiva-relative */}
       <AshParticles />
