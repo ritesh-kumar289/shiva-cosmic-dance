@@ -47,21 +47,30 @@ const FRAG = /* glsl */`
   }
 
   void main(){
+    // Anisotropic envelope — wider horizontally and squashed vertically so
+    // the silhouette is wispy/elongated, not a perfect ball.
     vec2 c = vUv - 0.5;
-    float r = length(c) * 2.0;
-    float puff = 1.0 - smoothstep(0.55, 1.0, r);   // soft circular envelope
-    if (puff <= 0.0) discard;
+    vec2 cs = vec2(c.x * 0.85, c.y * 1.55);   // squash Y to flatten
+    float r = length(cs) * 2.0;
+    float envelope = 1.0 - smoothstep(0.20, 1.05, r); // very soft, big feather
 
-    vec2 q = (vUv + vec2(uSeed * 7.31, uSeed * 3.17)) * 2.6 + uDrift * uTime;
+    // Noise — sample TWICE: once for shape, once to chew up the silhouette
+    vec2 q = (vUv + vec2(uSeed * 7.31, uSeed * 3.17)) * 2.4 + uDrift * uTime;
     float n1 = fbm(q);
-    float n2 = fbm(q * 1.9 + n1 * 0.7);
+    float n2 = fbm(q * 2.1 + n1 * 0.9 + vec2(11.0, -3.0));
     float n  = n1 * 0.55 + n2 * 0.6;
 
-    float clouds = smoothstep(0.42, 0.85, n);
-    float a = clouds * puff * uOpacity;
-    if (a < 0.01) discard;
+    // Edge-eating mask: noise carves chunks out of the envelope so edges
+    // are frilly and irregular instead of round.
+    float edgeNoise = fbm(q * 1.3 + vec2(uSeed * 9.0, 0.0));
+    float bite = smoothstep(0.05, 0.55, envelope * (0.55 + edgeNoise * 0.85));
 
-    float light = smoothstep(0.30, 0.85, n);
+    // Cloud body — low threshold + wide range = soft wisps, not hard blobs
+    float clouds = smoothstep(0.30, 0.78, n);
+    float a = clouds * bite * uOpacity;
+    if (a < 0.012) discard;
+
+    float light = smoothstep(0.28, 0.82, n);
     vec3 dark   = mix(uColLow,  uColMid, light);
     dark        = mix(dark, uColHi, smoothstep(0.78, 1.0, light));
     vec3 sunset = mix(uColLowL, uColMidL, light);
@@ -90,65 +99,69 @@ function buildPuffs() {
   const puffs = []
 
   // Far surround — bulk wrap-around horizon
-  for (let i = 0; i < 42; i++) {
+  for (let i = 0; i < 50; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 22 + rand() * 48
     const y     = -4 + rand() * 32
-    const size  = 14 + rand() * 22
+    const size  = 18 + rand() * 26
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
+      aspect: 1.6 + rand() * 1.4,                  // 1.6..3.0 — wide strips
       drift: [(rand() - 0.5) * 0.02, (rand() - 0.5) * 0.02],
       yTint: THREE.MathUtils.clamp((y - 8) / 16, -1, 1),
-      op: 0.72 + rand() * 0.28,
+      op: 0.55 + rand() * 0.30,
       parX: 2 + rand() * 6, parZ: 1 + rand() * 3,
     })
   }
 
   // Mid — closer puffs at chest-to-head height
-  for (let i = 0; i < 22; i++) {
+  for (let i = 0; i < 26; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 14 + rand() * 12
     const y     = -2 + rand() * 12
-    const size  = 8  + rand() * 12
+    const size  = 10 + rand() * 14
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
+      aspect: 1.8 + rand() * 1.6,
       drift: [(rand() - 0.5) * 0.025, (rand() - 0.5) * 0.025],
       yTint: THREE.MathUtils.clamp((y - 4) / 10, -0.6, 0.6),
-      op: 0.55 + rand() * 0.30,
+      op: 0.40 + rand() * 0.30,
       parX: 4 + rand() * 6, parZ: 1 + rand() * 3,
     })
   }
 
-  // Low ground mist — flat, just above snow
-  for (let i = 0; i < 14; i++) {
+  // Low ground mist — flat, just above snow (very wide & thin)
+  for (let i = 0; i < 18; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 10 + rand() * 35
     const y     = -6 + rand() * 3
-    const size  = 22 + rand() * 26
+    const size  = 26 + rand() * 30
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
+      aspect: 2.4 + rand() * 1.8,                  // very stretched horizontally
       drift: [(rand() - 0.5) * 0.015, (rand() - 0.5) * 0.015],
       yTint: -0.6,
-      op: 0.55 + rand() * 0.25,
+      op: 0.45 + rand() * 0.25,
       parX: 3 + rand() * 4, parZ: 1 + rand() * 2,
     })
   }
 
-  // High cirrus
-  for (let i = 0; i < 16; i++) {
+  // High cirrus — long thin streaks
+  for (let i = 0; i < 20; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 18 + rand() * 40
     const y     = 18 + rand() * 14
-    const size  = 18 + rand() * 28
+    const size  = 22 + rand() * 30
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
+      aspect: 2.8 + rand() * 2.0,                  // long wisps
       drift: [(rand() - 0.5) * 0.03, (rand() - 0.5) * 0.01],
       yTint: 0.8,
-      op: 0.35 + rand() * 0.25,
+      op: 0.30 + rand() * 0.25,
       parX: 6 + rand() * 6, parZ: 2 + rand() * 3,
     })
   }
@@ -196,7 +209,8 @@ function Puff({ cfg }) {
 
   return (
     <mesh ref={meshRef} position={cfg.pos} renderOrder={2}>
-      <planeGeometry args={[cfg.size, cfg.size * 0.7, 1, 1]} />
+      {/* Wide & flat — clouds, not balls. Aspect varies per puff. */}
+      <planeGeometry args={[cfg.size * cfg.aspect, cfg.size * 0.45, 1, 1]} />
       <shaderMaterial
         ref={matRef}
         vertexShader={VERT}
