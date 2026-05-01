@@ -11,6 +11,8 @@ import DissolutionEffect from './DissolutionEffect'
 import PostFX from './PostFX'
 import Lighting from './Lighting'
 import CosmicTexts from './CosmicTexts'
+import CloudCarpet from './CloudCarpet'
+import ThemedFog from './ThemedFog'
 
 // Trigger preload early so GLB is cached before components render
 useGLTF.preload('/models/snow_mountain.glb')
@@ -57,13 +59,16 @@ export default function Experience() {
 
       <Lighting />
 
-      {/* Fog: start far enough so mountain is not obscured */}
-      <fog attach="fog" args={['#020410', 150, 600]} />
+      {/* Fog: theme-aware (deep cosmos vs sunset haze) */}
+      <ThemedFog />
 
       {/* Mount Kailash */}
       <Suspense fallback={null}>
         <Kailash />
       </Suspense>
+
+      {/* Vanta-style cloud carpet around mountain base */}
+      <CloudCarpet />
 
       {/* Sacred ash particles drift near mountain base — in world space, not Shiva-relative */}
       <AshParticles />

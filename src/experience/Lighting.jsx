@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { scrollStore } from '../scrollStore'
+import { themeStore } from '../theme/themeStore'
 
 export default function Lighting() {
   const ambRef     = useRef()
@@ -24,9 +25,16 @@ export default function Lighting() {
     return { peakY: -8 + (box.max.y + (-box.min.y)) * mScale - 1.5, shivaZ: sz }
   }, [mtnGLB])
 
+  const themeT = useRef(themeStore.current === 'light' ? 1 : 0)
+
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime()
     const p = scrollStore.progress
+
+    // Smoothly blend between dark (0) and sunset (1) themes
+    const themeTarget = themeStore.current === 'light' ? 1 : 0
+    themeT.current += (themeTarget - themeT.current) * 0.06
+    const TH = themeT.current
 
     // Void (0–0.2): very dark
     // Awakening (0.2–0.4): blue moonlight grows
@@ -46,28 +54,32 @@ export default function Lighting() {
         + tandava   * 0.20
         + thirdEye  * 0.55
         + diss      * 0.05
-      ambRef.current.intensity = ambIntensity
-      ambRef.current.color.setRGB(
-        0.7 + tandava * 0.3 + thirdEye * 0.3,
-        0.7 + awakening * 0.1 + thirdEye * 0.2,
-        0.85 + awakening * 0.1 + diss * 0.1
-      )
+      // Light mode reads brighter overall (daylit sunset)
+      ambRef.current.intensity = ambIntensity + TH * 0.55
+      // Cool moonlit colour vs warm sunset peach
+      const r = (0.7 + tandava * 0.3 + thirdEye * 0.3) * (1 - TH) + 1.00 * TH
+      const g = (0.7 + awakening * 0.1 + thirdEye * 0.2) * (1 - TH) + 0.78 * TH
+      const b = (0.85 + awakening * 0.1 + diss * 0.1)    * (1 - TH) + 0.62 * TH
+      ambRef.current.color.setRGB(r, g, b)
     }
 
     // Constant front fill light — makes Shiva's textures always visible
     if (fillRef.current) {
-      fillRef.current.intensity = 0.7 + awakening * 0.6 + tandava * 0.5
-      fillRef.current.color.setRGB(
-        0.9 + tandava * 0.1,
-        0.85,
-        0.8 - tandava * 0.2
-      )
+      fillRef.current.intensity = (0.7 + awakening * 0.6 + tandava * 0.5) + TH * 0.4
+      const fr = (0.9 + tandava * 0.1) * (1 - TH) + 1.00 * TH
+      const fg = 0.85                  * (1 - TH) + 0.70 * TH
+      const fb = (0.8 - tandava * 0.2) * (1 - TH) + 0.50 * TH
+      fillRef.current.color.setRGB(fr, fg, fb)
     }
 
     if (moonRef.current) {
       // Directional moonlight: always on at decent strength so mountain is lit
-      moonRef.current.intensity = 0.3 + awakening * 0.4 * (1 - tandava * 0.4)
-      moonRef.current.color.setRGB(0.7, 0.8, 1.0)
+      moonRef.current.intensity = (0.3 + awakening * 0.4 * (1 - tandava * 0.4)) + TH * 0.6
+      // In sunset mode this becomes a low warm sun
+      const mr = 0.7 * (1 - TH) + 1.00 * TH
+      const mg = 0.8 * (1 - TH) + 0.65 * TH
+      const mb = 1.0 * (1 - TH) + 0.45 * TH
+      moonRef.current.color.setRGB(mr, mg, mb)
     }
 
     if (blueRef.current) {

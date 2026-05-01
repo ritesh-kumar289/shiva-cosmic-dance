@@ -408,6 +408,106 @@ canvas {
   color: rgba(200, 220, 255, 0.7);
 }
 
+/* ── Theme toggle ────────────────────────────────────────── */
+.theme-toggle {
+  position: fixed;
+  top: 22px;
+  right: 150px;            /* sit to the LEFT of the audio toggle */
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px 9px 12px;
+  background: rgba(10, 12, 24, 0.55);
+  border: 1px solid rgba(180, 210, 255, 0.25);
+  border-radius: 999px;
+  color: rgba(220, 230, 255, 0.85);
+  font-size: 0.7rem;
+  letter-spacing: 0.32em;
+  font-family: inherit;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease, color 0.3s ease;
+}
+.theme-toggle:hover {
+  background: rgba(40, 50, 80, 0.7);
+  border-color: rgba(180, 210, 255, 0.55);
+  transform: translateY(-1px);
+}
+.theme-toggle__icon { font-size: 0.95rem; line-height: 1; }
+.theme-toggle__lbl {
+  font-size: 0.6rem;
+  letter-spacing: 0.32em;
+  color: rgba(200, 220, 255, 0.7);
+}
+
+/* ── Light mode (sunset palette) ─────────────────────────── */
+html[data-theme="light"] {
+  background: linear-gradient(to bottom, #ffd9a8 0%, #f7a06e 55%, #d76a6a 100%);
+}
+html[data-theme="light"] body {
+  background: transparent;
+  color: #3a1c12;
+}
+
+/* Loader: warm dawn */
+html[data-theme="light"] .loader {
+  background: radial-gradient(ellipse at center, #fff1d9 0%, #f5a06b 60%, #c45f5e 100%);
+}
+html[data-theme="light"] .loader__title {
+  color: rgba(80, 30, 20, 0.95);
+  text-shadow: 0 0 40px rgba(255, 180, 120, 0.85);
+}
+html[data-theme="light"] .loader__sub { color: rgba(80, 30, 20, 0.55); }
+html[data-theme="light"] .loader__bar { background: rgba(80, 30, 20, 0.18); }
+
+/* Toggles & UI chrome — dark text on warm glass */
+html[data-theme="light"] .audio-toggle,
+html[data-theme="light"] .theme-toggle {
+  background: rgba(255, 235, 210, 0.55);
+  border-color: rgba(180, 80, 60, 0.35);
+  color: #4a1f15;
+}
+html[data-theme="light"] .audio-toggle:hover,
+html[data-theme="light"] .theme-toggle:hover {
+  background: rgba(255, 220, 190, 0.85);
+  border-color: rgba(180, 80, 60, 0.7);
+}
+html[data-theme="light"] .audio-toggle__lbl,
+html[data-theme="light"] .theme-toggle__lbl {
+  color: rgba(80, 30, 20, 0.7);
+}
+
+/* Progress dots: warm tones */
+html[data-theme="light"] .dot {
+  border-color: rgba(80, 30, 20, 0.35);
+}
+html[data-theme="light"] .dot--active {
+  background: rgba(220, 110, 80, 0.95);
+  border-color: rgba(220, 110, 80, 0.9);
+  box-shadow: 0 0 12px rgba(255, 140, 90, 0.85);
+}
+html[data-theme="light"] .dot:hover {
+  border-color: rgba(80, 30, 20, 0.65);
+  background: rgba(255, 200, 160, 0.4);
+}
+
+/* Scroll hint */
+html[data-theme="light"] .scroll-hint__text { color: rgba(80, 30, 20, 0.55); }
+html[data-theme="light"] .scroll-hint__line {
+  background: linear-gradient(to bottom, rgba(80, 30, 20, 0.45), transparent);
+}
+
+/* Scene-text overlay legibility on bright sunset sky */
+html[data-theme="light"] .scene-text,
+html[data-theme="light"] .scene-text * {
+  color: #2b0e08 !important;
+  text-shadow:
+    0 0 18px rgba(255, 220, 180, 0.85),
+    0 0 38px rgba(255, 160, 110, 0.55) !important;
+}
+
 /* ── Keyframes ───────────────────────────────────────────── */
 @keyframes om-pulse {
   0%, 100% { opacity: 0.5; transform: scale(1); }
@@ -453,6 +553,8 @@ canvas {
   .progress-dots { right: 18px; gap: 11px; }
   .audio-toggle  { top: 16px; right: 16px; padding: 7px 11px; }
   .audio-toggle__lbl { display: none; }
+  .theme-toggle  { top: 16px; right: 70px; padding: 7px 11px; }
+  .theme-toggle__lbl { display: none; }
   .trishul-track { width: clamp(220px, 70vw, 480px); }
 }
 
@@ -464,6 +566,8 @@ canvas {
   .scroll-hint__line { height: 32px; }
   .audio-toggle { top: 12px; right: 12px; padding: 6px 9px; font-size: 0.85rem; }
   .audio-toggle__lbl { display: none; }
+  .theme-toggle { top: 12px; right: 60px; padding: 6px 9px; font-size: 0.85rem; }
+  .theme-toggle__lbl { display: none; }
 
   .loader__title { font-size: clamp(1.6rem, 9vw, 2.6rem); }
   .loader__sub   { font-size: 0.6rem; letter-spacing: 0.32em; text-align: center; padding: 0 1rem; }

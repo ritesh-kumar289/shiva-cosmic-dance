@@ -3,11 +3,14 @@ import { useFrame } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { scrollStore } from '../scrollStore'
+import { themeStore } from '../theme/themeStore'
 
 useGLTF.preload('/models/snow_mountain.glb')
 
 export default function Kailash() {
   const groupRef = useRef()
+  const groundRef = useRef()
+  const themeT = useRef(themeStore.current === 'light' ? 1 : 0)
   const { scene } = useGLTF('/models/snow_mountain.glb')
 
   // Auto-scale based on actual GLB bounding box — no hardcoded scale
@@ -66,6 +69,18 @@ export default function Kailash() {
     // Scene 5 dissolution: mountain slowly sinks
     const diss = THREE.MathUtils.smoothstep(p, 0.82, 0.98)
     groupRef.current.position.y = -8 - diss * 5
+
+    // Theme-aware ground tint (cool snow ↔ warm dune)
+    const target = themeStore.current === 'light' ? 1 : 0
+    themeT.current += (target - themeT.current) * 0.06
+    if (groundRef.current) {
+      const c = groundRef.current.material.color
+      c.setRGB(
+        0.78 * (1 - themeT.current) + 0.95 * themeT.current,
+        0.85 * (1 - themeT.current) + 0.62 * themeT.current,
+        0.94 * (1 - themeT.current) + 0.50 * themeT.current,
+      )
+    }
   })
 
   return (
@@ -76,8 +91,8 @@ export default function Kailash() {
         </group>
       </group>
 
-      {/* Vast snow/ice ground plane */}
-      <mesh position={[0, 0, 10]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      {/* Vast ground plane — tints between snow and warm sand by theme */}
+      <mesh ref={groundRef} position={[0, 0, 10]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[1200, 800]} />
         <meshStandardMaterial color="#c8d8f0" roughness={0.88} metalness={0.04} />
       </mesh>

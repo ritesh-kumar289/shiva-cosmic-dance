@@ -3,11 +3,14 @@ import { useFrame } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { scrollStore } from '../scrollStore'
+import { themeStore } from '../theme/themeStore'
 
 useGLTF.preload('/models/need_some_space.glb')
 
 export default function SpaceEnvironment() {
   const groupRef = useRef()
+  const matsRef  = useRef([])
+  const themeT   = useRef(themeStore.current === 'light' ? 1 : 0)
   const { scene } = useGLTF('/models/need_some_space.glb')
 
   // Auto-scale: fill a giant sphere around the scene
@@ -24,6 +27,7 @@ export default function SpaceEnvironment() {
   }, [scene])
 
   useEffect(() => {
+    const collected = []
     scene.traverse((child) => {
       // Handle BOTH regular meshes AND point cloud star particles
       const isRenderable = child.isMesh || child.isPoints || child.isLine
@@ -45,11 +49,15 @@ export default function SpaceEnvironment() {
         if (m.color) m.color.multiplyScalar(0.3)
         if (m.emissive) { m.emissive.setRGB(0, 0, 0); m.emissiveIntensity = 0 }
         if ('emissiveMap' in m) m.emissiveMap = null
+        // Stash the post-darken color so we can blend it toward sunset later
+        m.userData.darkColor = m.color ? m.color.clone() : new THREE.Color(0, 0, 0)
         m.needsUpdate = true
+        collected.push(m)
       })
       // render BEFORE every other object — renderOrder=-10 guarantees this
       child.renderOrder = -10
     })
+    matsRef.current = collected
   }, [scene])
 
   useFrame(({ clock }) => {
@@ -59,6 +67,21 @@ export default function SpaceEnvironment() {
     // Slow cosmic drift
     groupRef.current.rotation.y = t * 0.006
     groupRef.current.rotation.x = Math.sin(t * 0.003) * 0.03
+
+    // In sunset/light mode the deep cosmos washes out into a peach sky.
+    const target = themeStore.current === 'light' ? 1 : 0
+    themeT.current += (target - themeT.current) * 0.06
+    const TH = themeT.current
+    const sunsetR = 0.96, sunsetG = 0.62, sunsetB = 0.42
+    matsRef.current.forEach((m) => {
+      if (!m.color || !m.userData.darkColor) return
+      const d = m.userData.darkColor
+      m.color.setRGB(
+        d.r * (1 - TH) + sunsetR * TH,
+        d.g * (1 - TH) + sunsetG * TH,
+        d.b * (1 - TH) + sunsetB * TH,
+      )
+    })
   })
 
   return (

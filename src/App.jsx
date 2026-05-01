@@ -5,6 +5,7 @@ import Experience from './experience/Experience'
 import Overlay from './overlay/Overlay'
 import Loader from './overlay/Loader'
 import AudioController from './audio/AudioController'
+import ThemeToggle from './theme/ThemeToggle'
 
 export default function App() {
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -56,6 +57,9 @@ export default function App() {
 
         {/* Background music + scene SFX */}
         <AudioController />
+
+        {/* Theme toggle (sunset / cosmos) */}
+        <ThemeToggle />
 
         {/* Scroll hint */}
         <div className="scroll-hint scroll-hint--visible">
