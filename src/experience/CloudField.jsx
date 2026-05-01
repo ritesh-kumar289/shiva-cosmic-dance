@@ -134,20 +134,20 @@ function buildPuffs() {
     })
   }
 
-  // High belt — sea of cloud reaching up to just below Shiva's chest.
-  // Center y=14..19 with vertical half-extent ~5 → cloud tops max ~y=24,
-  // chest at y≈25 → tops kiss the chest line, leaving head+halo clear.
-  for (let i = 0; i < 36; i++) {
+  // High belt — sea of cloud reaching up to Shiva's chest line.
+  // Center y=20..26 with vertical half-extent ~5 → cloud tops up to ~y=31,
+  // Shiva chest ~y=25 → tops embrace torso, head+halo (y≈30+) stay clear.
+  for (let i = 0; i < 40; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 14 + rand() * 50
-    const y     = 14 + rand() * 5                  // 14..19
+    const y     = 20 + rand() * 6                  // 20..26 (waist→chest)
     const size  = 18 + rand() * 18
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
       aspect: 2.6 + rand() * 1.8,
       drift: [(rand() - 0.5) * 0.020, (rand() - 0.5) * 0.010],
-      yTint: 0.35,
+      yTint: 0.45,
       op: 0.45 + rand() * 0.25,
       parX: 5 + rand() * 5, parZ: 2 + rand() * 3,
     })
