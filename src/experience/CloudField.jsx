@@ -92,77 +92,81 @@ function mulberry32(seed) {
   }
 }
 
-// Scattered puff layout: clouds stay BELOW Shiva's chest (~y=2) so the
-// hero figure remains clear above an ocean of cloud at every angle.
+// Scattered puff layout: clouds rise from the snow base UP to just below
+// Shiva's chest. Mountain peak (Shiva's feet) is at world y≈18.5 and the
+// model is 12 tall, so chest sits around y≈25. We cap cloud Y at ≈23 so
+// the chest+head+halo stay clear above an ocean of cloud.
 function buildPuffs() {
   const rand = mulberry32(0xC10D)
   const puffs = []
 
-  // Far surround — bulk wrap-around horizon (kept low)
-  for (let i = 0; i < 50; i++) {
+  // Low cloud bank — around snow base, hugging the foothills
+  for (let i = 0; i < 26; i++) {
     const theta = rand() * Math.PI * 2
-    const r     = 22 + rand() * 48
-    const y     = -6 + rand() * 7                  // -6..1 (under chest)
-    const size  = 18 + rand() * 26
+    const r     = 18 + rand() * 50
+    const y     = -6 + rand() * 6                  // -6..0
+    const size  = 22 + rand() * 28
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
-      aspect: 1.6 + rand() * 1.4,
-      drift: [(rand() - 0.5) * 0.02, (rand() - 0.5) * 0.02],
-      yTint: THREE.MathUtils.clamp((y + 2) / 6, -1, 1),
-      op: 0.55 + rand() * 0.30,
-      parX: 2 + rand() * 6, parZ: 1 + rand() * 3,
+      aspect: 2.2 + rand() * 1.6,
+      drift: [(rand() - 0.5) * 0.018, (rand() - 0.5) * 0.012],
+      yTint: -0.5,
+      op: 0.50 + rand() * 0.25,
+      parX: 3 + rand() * 4, parZ: 1 + rand() * 2,
     })
   }
 
-  // Mid — closer puffs around the mountain flanks (still below chest)
-  for (let i = 0; i < 26; i++) {
+  // Mid wrap — around the mountain slopes
+  for (let i = 0; i < 36; i++) {
     const theta = rand() * Math.PI * 2
-    const r     = 14 + rand() * 12
-    const y     = -4 + rand() * 5                  // -4..1
-    const size  = 10 + rand() * 14
+    const r     = 16 + rand() * 45
+    const y     = 0 + rand() * 11                  // 0..11 (slopes)
+    const size  = 16 + rand() * 22
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
       aspect: 1.8 + rand() * 1.6,
-      drift: [(rand() - 0.5) * 0.025, (rand() - 0.5) * 0.025],
-      yTint: THREE.MathUtils.clamp((y + 2) / 5, -0.6, 0.6),
+      drift: [(rand() - 0.5) * 0.022, (rand() - 0.5) * 0.018],
+      yTint: THREE.MathUtils.clamp((y - 5) / 6, -0.4, 0.4),
       op: 0.40 + rand() * 0.30,
       parX: 4 + rand() * 6, parZ: 1 + rand() * 3,
     })
   }
 
-  // Low ground mist — wide thin sheets just above the snow
-  for (let i = 0; i < 22; i++) {
+  // High belt — sea of cloud reaching up to just below Shiva's chest.
+  // Center y=14..19 with vertical half-extent ~5 → cloud tops max ~y=24,
+  // chest at y≈25 → tops kiss the chest line, leaving head+halo clear.
+  for (let i = 0; i < 36; i++) {
     const theta = rand() * Math.PI * 2
-    const r     = 10 + rand() * 35
-    const y     = -7 + rand() * 4                  // -7..-3
-    const size  = 26 + rand() * 30
+    const r     = 14 + rand() * 50
+    const y     = 14 + rand() * 5                  // 14..19
+    const size  = 18 + rand() * 18
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
-      aspect: 2.4 + rand() * 1.8,
-      drift: [(rand() - 0.5) * 0.015, (rand() - 0.5) * 0.015],
-      yTint: -0.6,
+      aspect: 2.6 + rand() * 1.8,
+      drift: [(rand() - 0.5) * 0.020, (rand() - 0.5) * 0.010],
+      yTint: 0.35,
       op: 0.45 + rand() * 0.25,
-      parX: 3 + rand() * 4, parZ: 1 + rand() * 2,
+      parX: 5 + rand() * 5, parZ: 2 + rand() * 3,
     })
   }
 
-  // Sea-of-cloud belt — long horizon strips right under chest line
+  // Far horizon strips — wide & long across distant background
   for (let i = 0; i < 18; i++) {
     const theta = rand() * Math.PI * 2
-    const r     = 28 + rand() * 35
-    const y     = -1 + rand() * 2.5                // -1..1.5 (chest-line haze)
-    const size  = 28 + rand() * 32
+    const r     = 50 + rand() * 30
+    const y     = 4 + rand() * 10                  // 4..14 horizon haze
+    const size  = 28 + rand() * 26
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
-      aspect: 3.0 + rand() * 2.0,                  // very long horizontal wisps
-      drift: [(rand() - 0.5) * 0.018, (rand() - 0.5) * 0.008],
+      aspect: 3.2 + rand() * 2.0,
+      drift: [(rand() - 0.5) * 0.015, (rand() - 0.5) * 0.008],
       yTint: 0.2,
-      op: 0.30 + rand() * 0.25,
-      parX: 5 + rand() * 5, parZ: 2 + rand() * 2,
+      op: 0.30 + rand() * 0.20,
+      parX: 6 + rand() * 4, parZ: 2 + rand() * 2,
     })
   }
 
