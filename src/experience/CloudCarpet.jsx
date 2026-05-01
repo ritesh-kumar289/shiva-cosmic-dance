@@ -2,6 +2,7 @@ import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { themeStore } from '../theme/themeStore'
+import { scrollStore } from '../scrollStore'
 
 // ─────────────────────────────────────────────────────────────────────
 // CloudCarpet — a vanta.js-style cloud layer wrapped around the base of
@@ -98,6 +99,7 @@ const FRAG = /* glsl */ `
 
 export default function CloudCarpet() {
   const matRef    = useRef()
+  const meshRef   = useRef()
   const themeRef  = useRef(themeStore.current === 'light' ? 1 : 0)
 
   const uniforms = useMemo(() => ({
@@ -119,6 +121,13 @@ export default function CloudCarpet() {
     const target = themeStore.current === 'light' ? 1 : 0
     themeRef.current += (target - themeRef.current) * 0.06
     matRef.current.uniforms.uTheme.value = themeRef.current
+    // Parallax: shift the carpet horizontally with scroll. Tiny offset
+    // is enough — the field is so large the eye reads it as movement.
+    if (meshRef.current) {
+      const flow = (scrollStore.progress - 0.5) * 2
+      meshRef.current.position.x = -flow * 4
+      meshRef.current.position.z = -10 + flow * 2
+    }
   })
 
   // The plane sits just above the snow ground (which is at y=-8). Pushing
@@ -126,6 +135,7 @@ export default function CloudCarpet() {
   // through the hole the mask carves around the mountain.
   return (
     <mesh
+      ref={meshRef}
       position={[0, -6.4, -10]}
       rotation={[-Math.PI / 2, 0, 0]}
       renderOrder={2}
