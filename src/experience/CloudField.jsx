@@ -103,59 +103,61 @@ function buildPuffs() {
   const rand = mulberry32(0xC10D)
   const puffs = []
 
-  // ── FLOOR BLANKET ─────────────────────────────────────────────────────
-  // Ground is at worldY=-8. Puffs MUST sit ABOVE it (y=-5..5) or they're
-  // clipped inside geometry and invisible. r=0..160 covers the full visible
-  // floor from all camera angles including top-down and near-camera.
-  for (let i = 0; i < 120; i++) {
-    const theta = rand() * Math.PI * 2
-    const r     = rand() * 160                     // 0..160 — covers full visible floor
-    const y     = -5 + rand() * 8                  // -5..3 — ABOVE the ground plane
-    const size  = 55 + rand() * 70                 // very large sheets
-    puffs.push({
-      pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
-      size, seed: rand(),
-      aspect: 2.8 + rand() * 2.0,
-      drift: [(rand() - 0.5) * 0.010, (rand() - 0.5) * 0.007],
-      yTint: -0.7,
-      op: 0.72 + rand() * 0.20,
-      parX: 0.5 + rand() * 2, parZ: 0.3 + rand() * 1,
-    })
-  }
-
-  // ── NEAR-CAMERA ZONE — covers floor between camera (z≈45) and mountain ─
-  // Camera sits at z=45. Without this zone, the floor directly in front of
-  // the camera is bare. Distribute in a rectangle rather than a circle.
-  for (let i = 0; i < 60; i++) {
-    const x = (rand() - 0.5) * 180
-    const z = 20 + rand() * 60                     // z=20..80, toward/past camera
-    const y = -4 + rand() * 7                      // -4..3
-    const size = 50 + rand() * 60
+  // ── FLOOR BLANKET — PRIMARY visible area z=-40..30, x=-70..75 ─────────
+  // Camera journey spans z=-42..108 at y=17..44. The main visible floor is
+  // a rectangle roughly z=-40..30, x=-70..75. Puffs MUST be ABOVE the ground
+  // plane (worldY=-8). y=-5..3 puts them just above it as ground mist.
+  // Dense rectangular placement guarantees no gaps.
+  for (let i = 0; i < 180; i++) {
+    const x    = -70 + rand() * 145               // -70..75 (full width)
+    const z    = -40 + rand() * 70                // -40..30 (main visible depth)
+    const y    = -5 + rand() * 7                  // -5..2 — just above ground
+    const size = 65 + rand() * 70                 // very large sheets
     puffs.push({
       pos: [x, y, z],
       size, seed: rand(),
-      aspect: 2.5 + rand() * 1.8,
-      drift: [(rand() - 0.5) * 0.012, (rand() - 0.5) * 0.008],
-      yTint: -0.6,
-      op: 0.70 + rand() * 0.22,
-      parX: 0.3 + rand() * 1.5, parZ: 0.2 + rand() * 0.8,
+      aspect: 3.0 + rand() * 2.0,
+      drift: [(rand() - 0.5) * 0.008, (rand() - 0.5) * 0.006],
+      yTint: -0.7,
+      op: 0.78 + rand() * 0.18,
+      parX: 0.3 + rand() * 1.0, parZ: 0.2 + rand() * 0.5,
     })
   }
 
-  // ── NEAR CORE (fills the blank area directly around the mountain) ──────
-  for (let i = 0; i < 40; i++) {
+  // ── WIDE PULL-BACK FLOOR — extra ring for scene 5 (camera at z=80..108) ─
+  // When camera pulls back to z=80..108, the visible floor extends to r≈200.
+  // Second ring at r=70..200 makes sure the far floor isn't bare in that view.
+  for (let i = 0; i < 120; i++) {
     const theta = rand() * Math.PI * 2
-    const r     = 2 + rand() * 22
-    const y     = -4 + rand() * 8                  // -4..4, above ground
-    const size  = 25 + rand() * 28
+    const r     = 70 + rand() * 130               // r=70..200
+    const y     = -5 + rand() * 7
+    const size  = 70 + rand() * 80
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
-      aspect: 2.0 + rand() * 1.8,
-      drift: [(rand() - 0.5) * 0.016, (rand() - 0.5) * 0.012],
+      aspect: 3.0 + rand() * 2.5,
+      drift: [(rand() - 0.5) * 0.008, (rand() - 0.5) * 0.005],
+      yTint: -0.65,
+      op: 0.72 + rand() * 0.20,
+      parX: 0.2 + rand() * 0.8, parZ: 0.1 + rand() * 0.4,
+    })
+  }
+
+  // ── MOUNTAIN BASE — dense ring right around the mountain footing ───────
+  // Mountain group is at (0,-8,-20). Dense coverage right at its base.
+  for (let i = 0; i < 60; i++) {
+    const theta = rand() * Math.PI * 2
+    const r     = 2 + rand() * 30                 // tight ring around mountain
+    const y     = -4 + rand() * 8                 // -4..4 above ground
+    const size  = 30 + rand() * 35
+    puffs.push({
+      pos: [Math.cos(theta) * r, y, Math.sin(theta) * r - 20],  // offset to mountain
+      size, seed: rand(),
+      aspect: 2.2 + rand() * 2.0,
+      drift: [(rand() - 0.5) * 0.014, (rand() - 0.5) * 0.010],
       yTint: -0.5,
-      op: 0.68 + rand() * 0.25,
-      parX: 2 + rand() * 3, parZ: 1 + rand() * 2,
+      op: 0.72 + rand() * 0.22,
+      parX: 1 + rand() * 2, parZ: 0.5 + rand() * 1.5,
     })
   }
 

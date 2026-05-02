@@ -67,7 +67,7 @@ canvas {
   position: absolute;
   inset: 0;
   background:
-    url('/loader-bg.jpg') center / cover no-repeat,
+    url('/loader-bg.png') center / cover no-repeat,
     radial-gradient(ellipse 80% 90% at 50% 55%,
       #161025 0%,
       #0d0a1e 35%,
