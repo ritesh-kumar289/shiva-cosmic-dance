@@ -139,29 +139,44 @@ export default function CosmicParticles() {
       else               { col[idx*3]=0.92; col[idx*3+1]=0.94; col[idx*3+2]=1.00 }
     }
 
-    /* ── NEBULA CLUSTERS — soft colorful gas clouds ────────── */
-    const nebCenters = [
-      { cx: -100, cy:  30, cz: -210, spread: [90, 55, 60], col: [0.05, 0.10, 0.45] },
-      { cx:  130, cy: -15, cz: -190, spread: [70, 50, 55], col: [0.40, 0.05, 0.50] },
-      { cx:  -50, cy: -70, cz: -225, spread: [80, 40, 65], col: [0.02, 0.28, 0.45] },
-      { cx:   70, cy:  90, cz: -160, spread: [55, 45, 50], col: [0.55, 0.28, 0.04] },
-      { cx:   10, cy:  80, cz: -200, spread: [65, 40, 60], col: [0.20, 0.15, 0.60] },
+    /* ── NEBULA CLUSTERS — scattered on far background sphere ─────────── */
+    // Place clusters on a sphere shell at r=260-320 (same depth as far stars).
+    // Previously they were at z=-160..-225 which put them INSIDE the scene.
+    // Now they're part of the deep background and scattered in ALL directions.
+    const nebPalettes = [
+      [0.05, 0.10, 0.45],   // deep blue
+      [0.40, 0.05, 0.50],   // purple-magenta
+      [0.02, 0.28, 0.45],   // teal
+      [0.50, 0.22, 0.02],   // amber
+      [0.20, 0.10, 0.55],   // blue-violet
+      [0.45, 0.02, 0.25],   // deep rose
+      [0.02, 0.35, 0.30],   // green-teal
+    ]
+    // Predefined angular positions spread around the sphere
+    const nebAngles = [
+      [0.35, 0.55], [1.10, 0.30], [1.85, 0.70], [2.60, 0.40],
+      [3.30, 0.60], [4.10, 0.25], [4.80, 0.75], [5.50, 0.45],
     ]
     for (let i = 0; i < COUNT_NEBULA; i++, idx++) {
-      const nc   = nebCenters[i % nebCenters.length]
-      const rx   = (Math.random() - 0.5) * nc.spread[0]
-      const ry   = (Math.random() - 0.5) * nc.spread[1]
-      const rz   = (Math.random() - 0.5) * nc.spread[2]
-      p[idx*3]   = nc.cx + rx
-      p[idx*3+1] = nc.cy + ry
-      p[idx*3+2] = nc.cz + rz
-      s[idx]  = 6.0 + Math.random() * 18.0
+      const nb     = nebAngles[i % nebAngles.length]
+      const theta  = nb[0] + (Math.random() - 0.5) * 0.6   // scatter around base angle
+      const phi    = Math.PI * nb[1] + (Math.random() - 0.5) * 0.4
+      const r      = 260 + Math.random() * 70                // r=260..330, deep background
+      const cx     = r * Math.sin(phi) * Math.cos(theta)
+      const cy     = r * Math.sin(phi) * Math.sin(theta) - 10
+      const cz     = r * Math.cos(phi)
+      const spread = 60 + Math.random() * 60
+      const ncol   = nebPalettes[i % nebPalettes.length]
+      p[idx*3]   = cx + (Math.random() - 0.5) * spread
+      p[idx*3+1] = cy + (Math.random() - 0.5) * spread * 0.7
+      p[idx*3+2] = cz + (Math.random() - 0.5) * spread
+      s[idx]  = 8.0 + Math.random() * 22.0
       ph[idx] = Math.random()
-      dep[idx] = 0.12
-      const bright = 0.18 + Math.random() * 0.38
-      col[idx*3]   = nc.col[0] * bright
-      col[idx*3+1] = nc.col[1] * bright
-      col[idx*3+2] = nc.col[2] * bright
+      dep[idx] = 0.08
+      const bright = 0.12 + Math.random() * 0.28
+      col[idx*3]   = ncol[0] * bright
+      col[idx*3+1] = ncol[1] * bright
+      col[idx*3+2] = ncol[2] * bright
     }
 
     return [p, s, ph, col, dep]

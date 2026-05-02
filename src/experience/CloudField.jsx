@@ -104,41 +104,57 @@ function buildPuffs() {
   const puffs = []
 
   // ── FLOOR BLANKET ─────────────────────────────────────────────────────
-  // Very large, flat puffs sitting ON the ground plane. They span all radii
-  // including r=0 so the entire floor is covered when viewed from above.
-  // These are the widest, lowest opacity sheets — think morning mist lying
-  // flat across the snow field.
-  for (let i = 0; i < 40; i++) {
+  // Ground is at worldY=-8. Puffs MUST sit ABOVE it (y=-5..5) or they're
+  // clipped inside geometry and invisible. r=0..160 covers the full visible
+  // floor from all camera angles including top-down and near-camera.
+  for (let i = 0; i < 120; i++) {
     const theta = rand() * Math.PI * 2
-    const r     = rand() * 80                      // 0..80 — all the way to center
-    const y     = -9 + rand() * 4                  // -9..-5 on the ground
-    const size  = 40 + rand() * 50                 // very large
+    const r     = rand() * 160                     // 0..160 — covers full visible floor
+    const y     = -5 + rand() * 8                  // -5..3 — ABOVE the ground plane
+    const size  = 55 + rand() * 70                 // very large sheets
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
-      aspect: 3.5 + rand() * 2.5,                  // very wide horizontal sheets
+      aspect: 2.8 + rand() * 2.0,
       drift: [(rand() - 0.5) * 0.010, (rand() - 0.5) * 0.007],
       yTint: -0.7,
-      op: 0.55 + rand() * 0.25,
-      parX: 1 + rand() * 3, parZ: 0.5 + rand() * 1,
+      op: 0.72 + rand() * 0.20,
+      parX: 0.5 + rand() * 2, parZ: 0.3 + rand() * 1,
+    })
+  }
+
+  // ── NEAR-CAMERA ZONE — covers floor between camera (z≈45) and mountain ─
+  // Camera sits at z=45. Without this zone, the floor directly in front of
+  // the camera is bare. Distribute in a rectangle rather than a circle.
+  for (let i = 0; i < 60; i++) {
+    const x = (rand() - 0.5) * 180
+    const z = 20 + rand() * 60                     // z=20..80, toward/past camera
+    const y = -4 + rand() * 7                      // -4..3
+    const size = 50 + rand() * 60
+    puffs.push({
+      pos: [x, y, z],
+      size, seed: rand(),
+      aspect: 2.5 + rand() * 1.8,
+      drift: [(rand() - 0.5) * 0.012, (rand() - 0.5) * 0.008],
+      yTint: -0.6,
+      op: 0.70 + rand() * 0.22,
+      parX: 0.3 + rand() * 1.5, parZ: 0.2 + rand() * 0.8,
     })
   }
 
   // ── NEAR CORE (fills the blank area directly around the mountain) ──────
-  // Small-radius puffs that sit just above the snow, right around the
-  // mountain base where the gap was most visible from top-down views.
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < 40; i++) {
     const theta = rand() * Math.PI * 2
-    const r     = 2 + rand() * 16                  // 2..18 — tight circle around mountain
-    const y     = -7 + rand() * 6                  // -7..-1
-    const size  = 20 + rand() * 20
+    const r     = 2 + rand() * 22
+    const y     = -4 + rand() * 8                  // -4..4, above ground
+    const size  = 25 + rand() * 28
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
       size, seed: rand(),
       aspect: 2.0 + rand() * 1.8,
       drift: [(rand() - 0.5) * 0.016, (rand() - 0.5) * 0.012],
       yTint: -0.5,
-      op: 0.50 + rand() * 0.30,
+      op: 0.68 + rand() * 0.25,
       parX: 2 + rand() * 3, parZ: 1 + rand() * 2,
     })
   }
@@ -230,9 +246,10 @@ function Puff({ cfg }) {
     uColLow:  { value: new THREE.Color(0.10, 0.14, 0.30) },
     uColMid:  { value: new THREE.Color(0.55, 0.66, 0.92) },
     uColHi:   { value: new THREE.Color(0.95, 0.97, 1.00) },
-    uColLowL: { value: new THREE.Color(0.45, 0.18, 0.32) },
-    uColMidL: { value: new THREE.Color(0.98, 0.62, 0.50) },
-    uColHiL:  { value: new THREE.Color(1.00, 0.92, 0.78) },
+    // Dawn palette: cool blue-white so clouds CONTRAST the orange floor
+    uColLowL: { value: new THREE.Color(0.55, 0.60, 0.75) },
+    uColMidL: { value: new THREE.Color(0.82, 0.88, 0.98) },
+    uColHiL:  { value: new THREE.Color(0.98, 0.98, 1.00) },
   }), [cfg])
 
   useFrame(({ clock, camera }) => {
