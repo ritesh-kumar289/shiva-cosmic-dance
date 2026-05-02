@@ -100,7 +100,47 @@ function buildPuffs() {
   const rand = mulberry32(0xC10D)
   const puffs = []
 
-  // Low cloud bank — around snow base, hugging the foothills
+  // ── FLOOR BLANKET ─────────────────────────────────────────────────────
+  // Very large, flat puffs sitting ON the ground plane. They span all radii
+  // including r=0 so the entire floor is covered when viewed from above.
+  // These are the widest, lowest opacity sheets — think morning mist lying
+  // flat across the snow field.
+  for (let i = 0; i < 40; i++) {
+    const theta = rand() * Math.PI * 2
+    const r     = rand() * 80                      // 0..80 — all the way to center
+    const y     = -9 + rand() * 4                  // -9..-5 on the ground
+    const size  = 40 + rand() * 50                 // very large
+    puffs.push({
+      pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
+      size, seed: rand(),
+      aspect: 3.5 + rand() * 2.5,                  // very wide horizontal sheets
+      drift: [(rand() - 0.5) * 0.010, (rand() - 0.5) * 0.007],
+      yTint: -0.7,
+      op: 0.55 + rand() * 0.25,
+      parX: 1 + rand() * 3, parZ: 0.5 + rand() * 1,
+    })
+  }
+
+  // ── NEAR CORE (fills the blank area directly around the mountain) ──────
+  // Small-radius puffs that sit just above the snow, right around the
+  // mountain base where the gap was most visible from top-down views.
+  for (let i = 0; i < 24; i++) {
+    const theta = rand() * Math.PI * 2
+    const r     = 2 + rand() * 16                  // 2..18 — tight circle around mountain
+    const y     = -7 + rand() * 6                  // -7..-1
+    const size  = 20 + rand() * 20
+    puffs.push({
+      pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
+      size, seed: rand(),
+      aspect: 2.0 + rand() * 1.8,
+      drift: [(rand() - 0.5) * 0.016, (rand() - 0.5) * 0.012],
+      yTint: -0.5,
+      op: 0.50 + rand() * 0.30,
+      parX: 2 + rand() * 3, parZ: 1 + rand() * 2,
+    })
+  }
+
+  // ── LOW CLOUD BANK — foothills ring ────────────────────────────────────
   for (let i = 0; i < 26; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 18 + rand() * 50
@@ -117,7 +157,7 @@ function buildPuffs() {
     })
   }
 
-  // Mid wrap — around the mountain slopes
+  // ── MID WRAP — mountain slopes ─────────────────────────────────────────
   for (let i = 0; i < 36; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 16 + rand() * 45
@@ -134,9 +174,7 @@ function buildPuffs() {
     })
   }
 
-  // High belt — sea of cloud reaching up to Shiva's chest line.
-  // Center y=20..26 with vertical half-extent ~5 → cloud tops up to ~y=31,
-  // Shiva chest ~y=25 → tops embrace torso, head+halo (y≈30+) stay clear.
+  // ── HIGH BELT — sea of cloud up to Shiva's chest ───────────────────────
   for (let i = 0; i < 40; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 14 + rand() * 50
@@ -153,11 +191,11 @@ function buildPuffs() {
     })
   }
 
-  // Far horizon strips — wide & long across distant background
+  // ── FAR HORIZON STRIPS ─────────────────────────────────────────────────
   for (let i = 0; i < 18; i++) {
     const theta = rand() * Math.PI * 2
     const r     = 50 + rand() * 30
-    const y     = 4 + rand() * 10                  // 4..14 horizon haze
+    const y     = 4 + rand() * 10
     const size  = 28 + rand() * 26
     puffs.push({
       pos: [Math.cos(theta) * r, y, Math.sin(theta) * r],
