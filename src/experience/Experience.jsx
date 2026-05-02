@@ -13,6 +13,8 @@ import Lighting from './Lighting'
 import CosmicTexts from './CosmicTexts'
 import CloudField from './CloudField'
 import ThemedFog from './ThemedFog'
+import MoonBackdrop from './MoonBackdrop'
+import CosmicParticles from './CosmicParticles'
 
 // Trigger preload early so GLB is cached before components render
 useGLTF.preload('/models/snow_mountain.glb')
@@ -56,6 +58,12 @@ export default function Experience() {
       <Suspense fallback={null}>
         <SpaceEnvironment />
       </Suspense>
+
+      {/* Multi-layer interactive star field + nebula clouds */}
+      <CosmicParticles />
+
+      {/* Large glowing moon behind Shiva — responds to mouse */}
+      <MoonBackdrop shivaX={3.5} shivaY={peakY} shivaZ={shivaZ} />
 
       <Lighting />
 

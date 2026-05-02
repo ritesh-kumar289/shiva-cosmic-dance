@@ -1,8 +1,11 @@
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { themeStore } from '../theme/themeStore'
 import { scrollStore } from '../scrollStore'
+
+// Module-level mouse state shared across all Puff instances
+const cloudMouse = { tx: 0, ty: 0, x: 0, y: 0 }
 
 // ─────────────────────────────────────────────────────────────────────
 // CloudField — vanta.js-style scattered volumetric clouds.
@@ -240,10 +243,20 @@ function Puff({ cfg }) {
     matRef.current.uniforms.uTheme.value = themeT.current
 
     const flow = (scrollStore.progress - 0.5) * 2
+
+    // Smooth cloud mouse  
+    cloudMouse.x += (cloudMouse.tx - cloudMouse.x) * 0.025
+    cloudMouse.y += (cloudMouse.ty - cloudMouse.y) * 0.025
+
+    // Mouse drifts clouds like wind — scale by puff parallax factor
+    const windX = cloudMouse.x * cfg.parX * 1.8
+    const windZ = cloudMouse.x * cfg.parZ * 0.9
+    const windY = cloudMouse.y * 1.5
+
     meshRef.current.position.set(
-      basePos.x - flow * cfg.parX,
-      basePos.y,
-      basePos.z + flow * cfg.parZ,
+      basePos.x - flow * cfg.parX + windX,
+      basePos.y + windY * 0.25,
+      basePos.z + flow * cfg.parZ - windZ,
     )
     // Billboard towards camera so puffs always read as 3D volumes
     meshRef.current.lookAt(camera.position)
@@ -268,6 +281,16 @@ function Puff({ cfg }) {
 
 export default function CloudField() {
   const puffs = useMemo(() => buildPuffs(), [])
+
+  useEffect(() => {
+    const onMove = (e) => {
+      cloudMouse.tx = (e.clientX / window.innerWidth)  * 2 - 1
+      cloudMouse.ty = -(e.clientY / window.innerHeight) * 2 + 1
+    }
+    window.addEventListener('pointermove', onMove)
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [])
+
   return (
     <group>
       {puffs.map((cfg, i) => <Puff key={i} cfg={cfg} />)}

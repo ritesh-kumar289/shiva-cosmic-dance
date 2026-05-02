@@ -80,20 +80,27 @@ export default function Loader() {
 
   return (
     <div className={`loader ${hidden ? 'loader--hidden' : ''}`}>
-      <p className="loader__title">शिव</p>
-      <p className="loader__sub">ENTERING THE COSMIC REALM</p>
+      {/* The attached reference image covers the whole background */}
+      <div className="loader__bg" />
 
-      <div className="trishul-track">
-        <div className="trishul-track__fill" style={{ width: `${pct}%` }} />
-        <div
-          className="trishul-track__icon"
-          style={{ left: `calc(${trishulPos}% - 28px)` }}
-        >
-          <TrishulIcon size={44} />
-        </div>
+      {/* Centered entering text */}
+      <div className="loader__body">
+        <p className="loader__sub">ENTERING THE COSMIC REALM</p>
       </div>
 
-      <p className="loader__pct">{Math.floor(pct)}%</p>
+      {/* Progress bar pinned to bottom */}
+      <div className="loader__footer">
+        <div className="trishul-track">
+          <div className="trishul-track__fill" style={{ width: `${pct}%` }} />
+          <div
+            className="trishul-track__icon"
+            style={{ left: `calc(${trishulPos}% - 28px)` }}
+          >
+            <TrishulIcon size={44} />
+          </div>
+        </div>
+        <p className="loader__pct">{Math.floor(pct)}%</p>
+      </div>
     </div>
   )
 }
